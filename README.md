@@ -5,11 +5,17 @@ This project implements a facial verification system using a Siamese Neural Netw
 ## Project Workflow
 ### 1. Data Preparation
 The dataset is structured into three categories:
+
 Anchor: Reference images of individuals.
+
 Positive: Different images of the same person.
+
 Negative: Images of different people.
+
 Uses the LFW (Labeled Faces in the Wild) dataset for training.
+
 Real-time face data can be captured using a webcam.
+
 ### 2. Preprocessing Pipeline
 Face Detection: Extracts facial regions from images using OpenCV.
 Data Augmentation: Applies transformations to improve model robustness.
