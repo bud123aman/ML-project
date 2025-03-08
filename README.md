@@ -1,4 +1,4 @@
-#Facial Recognition Using a Siamese Network
+# Facial Recognition Using a Siamese Network
 Overview
 This project implements a facial verification system using a Siamese Neural Network (SNN), a deep learning architecture designed to measure the similarity between two images. The model is trained to distinguish between facial images by learning a meaningful feature representation using contrastive loss. The project is developed using TensorFlow, Keras, OpenCV, and NumPy, and includes real-time facial recognition capabilities.
 
