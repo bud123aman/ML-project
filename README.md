@@ -6,38 +6,38 @@ This project implements a facial verification system using a Siamese Neural Netw
 ### 1. Data Preparation
 The dataset is structured into three categories:
 
-       Anchor: Reference images of individuals.
+    -> Anchor: Reference images of individuals.
 
-       Positive: Different images of the same person.
+    -> Positive: Different images of the same person.
 
-       Negative: Images of different people.
+    -> Negative: Images of different people.
 
-   Uses the LFW (Labeled Faces in the Wild) dataset for training.
+-> Uses the LFW (Labeled Faces in the Wild) dataset for training.
 
-   Real-time face data can be captured using a webcam.
+-> Real-time face data can be captured using a webcam.
 ### 2. Preprocessing Pipeline
-   Face Detection: Extracts facial regions from images using OpenCV.
+-> Face Detection: Extracts facial regions from images using OpenCV.
 
-   Data Augmentation: Applies transformations to improve model robustness.
+-> Data Augmentation: Applies transformations to improve model robustness.
 
-   Pair Generation: Creates anchor-positive and anchor-negative pairs for training.
+-> Pair Generation: Creates anchor-positive and anchor-negative pairs for training.
 
 ### 3. Siamese Network Architecture
-   The model consists of two identical Convolutional Neural Networks (CNNs) that extract feature embeddings from input images.
+-> The model consists of two identical Convolutional Neural Networks (CNNs) that extract feature embeddings from input images.
 
-   The extracted embeddings are compared using a distance metric (L1 distance layer).
+-> The extracted embeddings are compared using a distance metric (L1 distance layer).
 
-   The final output is a similarity score that determines whether the two images belong to the same person.
+-> The final output is a similarity score that determines whether the two images belong to the same person.
 
 Network Components:
 
-     Convolutional Layers: Extract spatial features from images.
+    -> Convolutional Layers: Extract spatial features from images.
 
-     MaxPooling Layers: Downsample feature maps.
+    -> MaxPooling Layers: Downsample feature maps.
 
-     Flatten & Dense Layers: Convert extracted features into a vector representation.
+    -> Flatten & Dense Layers: Convert extracted features into a vector representation.
 
-     Contrastive Loss Function: Optimizes the distance metric between positive and negative pairs.
+    -> Contrastive Loss Function: Optimizes the distance metric between positive and negative pairs.
 ### 4. Model Training
 -> The model is trained using contrastive loss, which minimizes the distance between similar images and maximizes the distance between dissimilar images.
 
