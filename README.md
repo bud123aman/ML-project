@@ -1,70 +1,260 @@
-# Facial Recognition Using a Siamese Network
-### Overview
-This project implements a facial verification system using a Siamese Neural Network (SNN), a deep learning architecture designed to measure the similarity between two images. The model is trained to distinguish between facial images by learning a meaningful feature representation using contrastive loss. The project is developed using TensorFlow, Keras, OpenCV, and NumPy, and includes real-time facial recognition capabilities.
+# Face Recognition System using Siamese Networks
 
-## Project Workflow
-### 1. Data Preparation
-The dataset is structured into three categories:
+This project implements a real-time **Face Recognition System** leveraging the power of **Siamese Neural Networks** with a custom L1 distance layer. The system is designed to verify identities by comparing a live input image against a set of known verification images.
 
-    -> Anchor: Reference images of individuals.
+---
 
-    -> Positive: Different images of the same person.
+## Project Overview
 
-    -> Negative: Images of different people.
+This repository contains the code for building and deploying a face recognition system using a **Siamese Network architecture**. Unlike traditional classification models that categorize an input into predefined classes, Siamese networks learn a similarity function. This allows the model to determine if two inputs (in this case, faces) belong to the same person or different people.
 
--> Uses the LFW (Labeled Faces in the Wild) dataset for training.
+The project covers:
+* **Data Collection**: Setting up directories and capturing custom "anchor" and "positive" images via webcam, alongside using external "negative" (LFW) dataset images.
+* **Data Preprocessing**: Transforming raw images into a suitable format for the neural network.
+* **Siamese Network Architecture**: Building a custom convolutional neural network (CNN) for embedding generation and integrating a custom L1 Distance layer to calculate similarity between face embeddings.
+* **Model Training**: Training the Siamese model using a contrastive loss function to learn effective facial embeddings.
+* **Real-time Verification**: Implementing a live webcam feed to capture input images and perform real-time identity verification against a set of known faces.
 
--> Real-time face data can be captured using a webcam.
-### 2. Preprocessing Pipeline
--> Face Detection: Extracts facial regions from images using OpenCV.
+---
 
--> Data Augmentation: Applies transformations to improve model robustness.
+## Key Features
 
--> Pair Generation: Creates anchor-positive and anchor-negative pairs for training.
+* **Custom Data Collection**: Directly capture your own `anchor` and `positive` images using your webcam for a personalized dataset.
+* **Siamese Network Implementation**: A robust CNN-based embedding model coupled with a custom L1 Distance layer for similarity computation.
+* **Efficient Data Pipeline**: Utilizes `tf.data` for optimized loading, caching, and shuffling of image pairs.
+* **Live Face Verification**: Integrates with OpenCV to perform real-time identity checks against a gallery of known faces.
+* **TensorFlow/Keras**: Built entirely with TensorFlow's Keras API for ease of development and scalability.
 
-### 3. Siamese Network Architecture
--> The model consists of two identical Convolutional Neural Networks (CNNs) that extract feature embeddings from input images.
+---
 
--> The extracted embeddings are compared using a distance metric (L1 distance layer).
+## Technologies Used
 
--> The final output is a similarity score that determines whether the two images belong to the same person.
+* **Python**: The core programming language.
+* **TensorFlow/Keras**: For building, training, and evaluating the deep learning models.
+* **OpenCV (`cv2`)**: For webcam access and real-time image capture.
+* **NumPy**: For numerical operations.
+* **Matplotlib**: For visualizing images and model insights.
+* **`uuid`**: For generating unique filenames during data collection.
+* **LFW Dataset**: Used as a source for `negative` (impostor) images.
 
-Network Components:
+---
 
-    -> Convolutional Layers: Extract spatial features from images.
+## Installation
 
-    -> MaxPooling Layers: Downsample feature maps.
+To get this project up and running on your local machine, follow these steps:
 
-    -> Flatten & Dense Layers: Convert extracted features into a vector representation.
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd face-recognition-siamese-network
+    ```
+2.  **Create a virtual environment (recommended):**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: `venv\Scripts\activate`
+    ```
+3.  **Install the required libraries:**
+    ```bash
+    pip install tensorflow opencv-python numpy matplotlib
+    ```
+4.  **Create necessary data directories:**
+    ```bash
+    mkdir -p data/positive data/negative data/anchor
+    mkdir -p application_data/input_image application_data/verification_images
+    ```
+    *(The `mkdir -p` command creates parent directories if they don't exist and doesn't throw an error if the directory already exists.)*
 
-    -> Contrastive Loss Function: Optimizes the distance metric between positive and negative pairs.
-### 4. Model Training
--> The model is trained using contrastive loss, which minimizes the distance between similar images and maximizes the distance between dissimilar images.
+5.  **Download and Prepare the LFW (Labeled Faces in the Wild) dataset:**
+    * Download the **"All images as gzipped tar file"** from the official LFW website: [http://vis-www.cs.umass.edu/lfw/](http://vis-www.cs.umass.edu/lfw/)
+    * Extract the `lfw.tgz` file into your project's root directory. After extraction, you should have an `lfw` folder containing subdirectories for each individual.
+    * **Move LFW images to `data/negative`:** Run the following Python code snippet (from your Jupyter Notebook or a separate `.py` script) to move the LFW images into your `data/negative` directory. This script uses `shutil.move` and handles potential duplicate filenames by skipping them.
+        ```python
+        import os
+        import shutil
 
--> Uses Adam optimizer for efficient learning.
+        NEG_PATH = os.path.join('data', 'negative')
+        LFW_PATH = 'lfw' # Assuming lfw is extracted directly into your project root
 
--> The training dataset consists of both genuine pairs (same person) and imposter pairs (different persons).
-### 5. Facial Verification System
--> Real-time Face Capture: Captures images using a webcam.
+        if os.path.exists(LFW_PATH):
+            for directory in os.listdir(LFW_PATH):
+                subdirectory_path = os.path.join(LFW_PATH, directory)
+                if os.path.isdir(subdirectory_path):
+                    for file_name in os.listdir(subdirectory_path):
+                        src_path = os.path.join(subdirectory_path, file_name)
+                        dst_path = os.path.join(NEG_PATH, file_name)
+                        if not os.path.exists(dst_path):
+                            shutil.move(src_path, dst_path)
+                        else:
+                            print(f"Skipping duplicate file: {file_name} (already exists in {NEG_PATH})")
+            print("LFW images moved to data/negative.")
+            # Optional: Clean up the original LFW directory if all images are moved
+            # shutil.rmtree(LFW_PATH) # Uncomment if you want to remove the original lfw folder
+        else:
+            print(f"LFW directory '{LFW_PATH}' not found. Please ensure it's extracted correctly into the project root.")
+        ```
 
--> Face Embedding Comparison: Compares new face embeddings with stored anchor embeddings.
+---
 
--> Identity Verification: Accepts or rejects a match based on a similarity threshold.
+## Usage
 
-Applications
--> Biometric Authentication: Secure login and access control.
+This project is designed to be run as a Jupyter Notebook.
 
--> Attendance Systems: Automated identity verification in workplaces and institutions.
+1.  **Open the Jupyter Notebook:**
+    ```bash
+    jupyter notebook <Your_Notebook_Name>.ipynb # Replace <Your_Notebook_Name> with the actual name of your notebook file
+    ```
+2.  **Run cells sequentially:** Proceed through the notebook cells in order.
+    * **Data Collection (Interactive):** There's a specific cell dedicated to live data collection using your webcam.
+        * When you run this cell, your webcam feed will appear.
+        * Press `a` to capture **anchor** images (images of the person you want to verify). Aim for around 300-400 images.
+        * Press `p` to capture **positive** images (more images of the *same* person as your anchor, possibly from different angles or expressions). Aim for around 300-400 images.
+        * Press `q` to quit the webcam feed and proceed to the next steps.
+        * *Important:* Ensure you have a good balance of `anchor`, `positive`, and `negative` images for effective training.
+    * **Model Training:** The notebook includes the training loop for the Siamese model. It's configured for 50 epochs.
+        * Training duration will vary based on your hardware.
+        * Model checkpoints will be saved periodically in the `./training_checkpoints` directory.
+    * **Real-time Verification:** The final section of the notebook sets up a live verification system.
+        * Run the relevant cell. Your webcam feed will activate again, showing a `Verification` window.
+        * **To perform a verification:** Position the face you want to verify in the webcam frame. Press the `v` key.
+            * The system will capture the current frame as `input_image.jpg` in the `application_data/input_image` folder.
+            * It will then compare this `input_image` against all images present in the `application_data/verification_images` folder.
+            * The console will output `True` if the captured face is verified (i.e., it's similar enough to a sufficient proportion of images in your `verification_images` folder) or `False` otherwise.
+            * **To set up your verification gallery:** Manually place images of the person(s) you wish to verify into the `application_data/verification_images` directory. The more diverse and clear the images (different angles, lighting), the better.
+        * Press `q` to quit the live webcam feed.
 
--> Surveillance & Security: Identifying authorized personnel.
+---
 
--> Personalized User Experiences: Customized AI-driven applications.
+## Model Architecture Details
 
-Technologies Used
--> Deep Learning Framework: TensorFlow & Keras
+The core of this system is a **Siamese Neural Network**. It operates by learning a similarity metric between pairs of inputs.
 
--> Computer Vision: OpenCV
+The network comprises:
 
--> Dataset: Labeled Faces in the Wild (LFW)
+1.  **Embedding Model (`make_embedding` function):** This is a Convolutional Neural Network (CNN) responsible for converting an input facial image (100x100x3 pixels) into a dense, lower-dimensional vector representation (an "embedding" of size 4096). This embedding aims to capture the unique features of a face.
 
--> Programming Language: Python
+    ```python
+    def make_embedding():
+        inp = Input(shape=(100,100,3), name='input_image')
+        # First Block
+        c1 = Conv2D(64, (10,10), activation='relu')(inp)
+        m1 = MaxPooling2D(64, (2,2), padding='same')(c1)
+        # Second Block
+        c2 = Conv2D(128, (7,7), activation='relu')(m1)
+        m2 = MaxPooling2D(64, (2,2), padding='same')(c2)
+        # Third Block
+        c3 = Conv2D(128, (4,4), activation='relu')(m2)
+        m3 = MaxPooling2D(64, (2,2), padding='same')(c3)
+        # Final Embedding Block
+        c4 = Conv2D(256, (4,4), activation='relu')(m3)
+        f1 = Flatten()(c4)
+        d1 = Dense(4096, activation='sigmoid')(f1)
+        return Model(inputs=[inp], outputs=d1, name='embedding')
+    ```
+
+    **Embedding Model Summary:**
+    ```
+    Model: "embedding"
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+    ┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+    │ input_image (InputLayer)        │ (None, 100, 100, 3)    │             0 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ conv2d (Conv2D)                 │ (None, 91, 91, 64)     │        19,264 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ max_pooling2d (MaxPooling2D)    │ (None, 46, 46, 64)     │             0 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ conv2d_1 (Conv2D)               │ (None, 40, 40, 128)    │       401,536 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ max_pooling2d_1 (MaxPooling2D)  │ (None, 20, 20, 128)    │             0 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ conv2d_2 (Conv2D)               │ (None, 17, 17, 128)    │       262,272 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ max_pooling2d_2 (MaxPooling2D)  │ (None, 9, 9, 128)      │             0 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ conv2d_3 (Conv2D)               │ (None, 6, 6, 256)      │       524,544 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ flatten (Flatten)               │ (None, 9216)           │             0 │
+    ├─────────────────────────────────┼────────────────────────┼───────────────┤
+    │ dense (Dense)                   │ (None, 4096)           │    37,752,832 │
+    └─────────────────────────────────┴────────────────────────┴───────────────┘
+     Total params: 38,960,448 (148.62 MB)
+     Trainable params: 38,960,448 (148.62 MB)
+     Non-trainable params: 0 (0.00 B)
+    ```
+
+2.  **L1 Distance Layer (`L1Dist` class):** This is a custom Keras layer that computes the absolute difference (L1 distance) element-wise between the two embeddings generated by the Siamese branches. This difference vector highlights where the embeddings diverge.
+
+    ```python
+    class L1Dist(Layer):
+        def __init__(self, **kwargs):
+            super().__init__()
+        def call(self, input_embedding, validation_embedding):
+            return tf.math.abs(input_embedding - validation_embedding)
+    ```
+
+3.  **Siamese Model (`make_siamese_model` function):** This top-level model takes two input images (an anchor and a validation image), passes each through the shared `embedding` model, calculates their L1 distance using the `L1Dist` layer, and then feeds this distance vector into a final `Dense` layer with a sigmoid activation. The output is a probability score between 0 and 1, indicating similarity. A score closer to 1 means the faces are likely the same person, while a score closer to 0 means they are different.
+
+    ```python
+    def make_siamese_model():
+        input_image = Input(name='input_img', shape=(100,100,3))
+        validation_image = Input(name='validation_img', shape=(100,100,3))
+
+        siamese_layer = L1Dist()
+        siamese_layer._name = 'distance' # Renaming for clarity in summary
+        distances = siamese_layer(embedding(input_image), embedding(validation_image))
+
+        classifier = Dense(1, activation='sigmoid')(distances)
+        return Model(inputs=[input_image, validation_image], outputs=classifier, name='SiameseNetwork')
+    ```
+
+    **Siamese Model Summary:**
+    ```
+    Model: "SiameseNetwork"
+    ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+    ┃ Layer (type)        ┃ Output Shape      ┃    Param # ┃ Connected to      ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+    │ input_img           │ (None, 100, 100,  │          0 │ -                 │
+    │ (InputLayer)        │ 3)                │            │                   │
+    ├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+    │ validation_img      │ (None, 100, 100,  │          0 │ -                 │
+    │ (InputLayer)        │ 3)                │            │                   │
+    ├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+    │ embedding           │ (None, 4096)      │ 38,960,448 │ input_img[0][0],  │
+    │ (Functional)        │                   │            │ validation_img[0… │
+    ├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+    │ l1_dist_4 (L1Dist)  │ (None, 4096)      │          0 │ embedding[0][0],  │
+    │                     │                   │            │ embedding[1][0]   │
+    ├─────────────────────┼───────────────────┼────────────┼───────────────────┤
+    │ dense_5 (Dense)     │ (None, 1)         │      4,097 │ l1_dist_4[0][0]   │
+    └─────────────────────┴───────────────────┴────────────┴───────────────────┘
+     Total params: 38,964,545 (148.64 MB)
+     Trainable params: 38,964,545 (148.64 MB)
+     Non-trainable params: 0 (0.00 B)
+    ```
+
+---
+
+## Model Evaluation
+
+During training, the model uses `BinaryCrossentropy` as the loss function and is optimized with Adam (learning rate 1e-4). After training, `Precision` and `Recall` metrics can be used to assess performance. The `verify` function uses two thresholds:
+
+* **Detection Threshold (e.g., 0.9):** Individual prediction score (from 0 to 1) above which a single comparison is considered a "match."
+* **Verification Threshold (e.g., 0.7):** The proportion of positive matches (from the detection threshold) out of all verification images. If this proportion exceeds the verification threshold, the identity is confirmed.
+
+---
+
+## Contributing
+
+We welcome contributions to this project! Whether it's reporting a bug, suggesting a new feature, improving documentation, or submitting code, your help is highly appreciated.
+
+We'll review your pull request as soon as possible and provide feedback. Thank you for your contribution!
+
+---
+
+
+
+## Contact
+
+For any questions or collaborations, please reach out at amansinghbudhala15@gmail.com
+
+---
