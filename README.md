@@ -66,63 +66,10 @@ To get this project up and running on your local machine, follow these steps:
 
 5.  **Download and Prepare the LFW (Labeled Faces in the Wild) dataset:**
     * Download the **"All images as gzipped tar file"** from the official LFW website: [http://vis-www.cs.umass.edu/lfw/](http://vis-www.cs.umass.edu/lfw/)
-    * Extract the `lfw.tgz` file into your project's root directory. After extraction, you should have an `lfw` folder containing subdirectories for each individual.
-    * **Move LFW images to `data/negative`:** Run the following Python code snippet (from your Jupyter Notebook or a separate `.py` script) to move the LFW images into your `data/negative` directory. This script uses `shutil.move` and handles potential duplicate filenames by skipping them.
-        ```python
-        import os
-        import shutil
 
-        NEG_PATH = os.path.join('data', 'negative')
-        LFW_PATH = 'lfw' # Assuming lfw is extracted directly into your project root
-
-        if os.path.exists(LFW_PATH):
-            for directory in os.listdir(LFW_PATH):
-                subdirectory_path = os.path.join(LFW_PATH, directory)
-                if os.path.isdir(subdirectory_path):
-                    for file_name in os.listdir(subdirectory_path):
-                        src_path = os.path.join(subdirectory_path, file_name)
-                        dst_path = os.path.join(NEG_PATH, file_name)
-                        if not os.path.exists(dst_path):
-                            shutil.move(src_path, dst_path)
-                        else:
-                            print(f"Skipping duplicate file: {file_name} (already exists in {NEG_PATH})")
-            print("LFW images moved to data/negative.")
-            # Optional: Clean up the original LFW directory if all images are moved
-            # shutil.rmtree(LFW_PATH) # Uncomment if you want to remove the original lfw folder
-        else:
-            print(f"LFW directory '{LFW_PATH}' not found. Please ensure it's extracted correctly into the project root.")
-        ```
 
 ---
 
-## Usage
-
-This project is designed to be run as a Jupyter Notebook.
-
-1.  **Open the Jupyter Notebook:**
-    ```bash
-    jupyter notebook <Your_Notebook_Name>.ipynb # Replace <Your_Notebook_Name> with the actual name of your notebook file
-    ```
-2.  **Run cells sequentially:** Proceed through the notebook cells in order.
-    * **Data Collection (Interactive):** There's a specific cell dedicated to live data collection using your webcam.
-        * When you run this cell, your webcam feed will appear.
-        * Press `a` to capture **anchor** images (images of the person you want to verify). Aim for around 300-400 images.
-        * Press `p` to capture **positive** images (more images of the *same* person as your anchor, possibly from different angles or expressions). Aim for around 300-400 images.
-        * Press `q` to quit the webcam feed and proceed to the next steps.
-        * *Important:* Ensure you have a good balance of `anchor`, `positive`, and `negative` images for effective training.
-    * **Model Training:** The notebook includes the training loop for the Siamese model. It's configured for 50 epochs.
-        * Training duration will vary based on your hardware.
-        * Model checkpoints will be saved periodically in the `./training_checkpoints` directory.
-    * **Real-time Verification:** The final section of the notebook sets up a live verification system.
-        * Run the relevant cell. Your webcam feed will activate again, showing a `Verification` window.
-        * **To perform a verification:** Position the face you want to verify in the webcam frame. Press the `v` key.
-            * The system will capture the current frame as `input_image.jpg` in the `application_data/input_image` folder.
-            * It will then compare this `input_image` against all images present in the `application_data/verification_images` folder.
-            * The console will output `True` if the captured face is verified (i.e., it's similar enough to a sufficient proportion of images in your `verification_images` folder) or `False` otherwise.
-            * **To set up your verification gallery:** Manually place images of the person(s) you wish to verify into the `application_data/verification_images` directory. The more diverse and clear the images (different angles, lighting), the better.
-        * Press `q` to quit the live webcam feed.
-
----
 
 ## Model Architecture Details
 
