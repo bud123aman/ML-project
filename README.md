@@ -192,9 +192,8 @@ During training, the model uses `BinaryCrossentropy` as the loss function and is
 
 ## Contributing
 
-We welcome contributions to this project! Whether it's reporting a bug, suggesting a new feature, improving documentation, or submitting code, your help is highly appreciated.
+I welcome contributions to this project! Whether it's reporting a bug, suggesting a new feature, improving documentation, or submitting code, your help is highly appreciated.
 
-We'll review your pull request as soon as possible and provide feedback. Thank you for your contribution!
 
 ---
 
